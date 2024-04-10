@@ -1,12 +1,16 @@
-const pg = require('pg');
+const {Surreal} = require('surrealdb.node');
 
-const db = new pg.Client({
-    user: "postgres",
-    host: "localhost",
-    database: "econo",
-    password: "test",
-    port: 5432,
-  });
+const db = new Surreal();
 
 
-  module.exports = db;
+
+// const db = new pg.Client({
+//     user: "postgres",
+//     host: "localhost",
+//     database: "econo",
+//     password: "test",
+//     port: 5432,
+//   });
+
+
+module.exports = db;

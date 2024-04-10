@@ -10,29 +10,15 @@ const saltRound = 10;
 // Register new user
 const newUser = async (email, password, username, callback) => {
     try {
-        // Check if the email already exists
-        const checkEmail = await db.query(`SELECT * FROM "User" WHERE email = $1`, [email]);
-
-        // If the email already exists
-        if (checkEmail.rows.length > 0) {
-            return callback(null, "Email already exists. Try logging in.");
-        } else {
-            // Hash password
-            bcrypt.hash(password, saltRound, async (err, hash) => {
-                if (err) {
-                    return callback(err);
-                } else {
-                    // Insert values in db
-                    try {
-                        await db.query(`INSERT INTO "User" (email, password, username) VALUES ($1, $2, $3)`, [email, hash, username]);
-                        return callback(null, 'ok');
-                    } catch (insertErr) {
-                        console.error("Error inserting user: ", insertErr);
-                        return callback(insertErr);
-                    }
-                }
-            });
-        }
+        let user = await db.query(`
+            BEGIN TRANSACTION;
+            LET  $p = create user content {"email" : "${email}","password" :"${password}","username":"${username}"};
+            RETURN $p.id;
+            COMMIT TRANSACTION;`
+        );
+        console.log(user)
+        console.log("sad")
+        return callback(null, 'ok');
     } catch (err) {
         console.log(err);
         return callback(err);
@@ -66,8 +52,9 @@ const loginuser = (req, res, next) => {
 passport.use(new LocalStrategy(async function (username, password, done) {
     try {
         // Check if the email exists
-        const ro = await db.query(`SELECT * FROM "User" WHERE email = $1`, [username]);
-
+        console.log(username)
+        const ro = await db.query(`SELECT * FROM user WHERE email = $1`, [username]);
+        console.log(ro)
         // If the email exists
         if (ro.rows.length > 0) {
             const user = ro.rows[0];
@@ -75,7 +62,7 @@ passport.use(new LocalStrategy(async function (username, password, done) {
             const storedHashedPassword = user.password;
 
             // Compare the provided password with the stored hashed password
-            await bcrypt.compare(password, storedHashedPassword, (err, valid) => {
+            bcrypt.compare(password, storedHashedPassword, (err, valid) => {
                 if (err) {
                     return done(err);
                 } else {
