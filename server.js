@@ -5,9 +5,7 @@ const express = require('express'),
       getReq = require('./routes/getReq'),
       postReq = require('./routes/postReq'),
       session = require('express-session'),
-      passport = require('passport'),
-      LocalStrategy = require('passport-local').Strategy;
-
+      passport = require('passport');
 // Middlware
 app.use(
     session({
